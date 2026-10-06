@@ -1,0 +1,4 @@
+interface:
+  display_name: "App-Bootstrap-ADM"
+  short_description: "Prepare apps from Moderaty SvelteKit patterns"
+  default_prompt: "Use $app-bootstrap-adm to prepare this app before feature work, including fast-check tests."
