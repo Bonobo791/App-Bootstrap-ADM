@@ -1,23 +1,16 @@
-# App-Bootstrap-ADM
+# Repository guidance
 
-Use `skills/app-bootstrap-adm/SKILL.md` when instantiating this template as a new app. Read the Moderaty worked example and expand applicable setup IDs into exact tasks before feature work.
+This is a small SvelteKit/Node toolkit for self-hosted Coolify on Contabo. The copyable application lives in `skills/app-bootstrap-adm/assets/app`.
 
-This is the reusable bootstrap repository. Its demo tests validate the harness; they do not prove a newly instantiated app's behavior. Implement and verify selected app foundations in that target.
+Keep two skills, the runnable app, short READMEs, environment example, checks and license. Keep project plans and evidence in the tracker. Remove source registers, research archives, worked examples, unrelated demos and duplicate planners.
 
-## Editing the bootstrap
+Use one npm lockfile, adapter-node and the production Node entry. Preserve an existing app's routes and data. Add accounts, storage and providers when its requirements call for them; keep private configuration and services server-only.
 
-Use `skills/plan-sites-and-apps-adm/SKILL.md` for a new product interview and plan. Publish the agreed plan as a new It's a Plan project with phase initiatives, native cycles, granular tasks and directional dependencies. Preserve answers and existing authorization; resolve real calendar/capacity/team decisions.
+Before committing, run:
 
-For planner changes run `python3 -m unittest discover -s skills/plan-sites-and-apps-adm/scripts -p 'test_*.py'` and the schedule example CLI in addition to repository validation.
+```sh
+node scripts/check.mjs
+node scripts/test-toolkit.mjs
+```
 
-Run `python3 scripts/validate.py`. In `skills/app-bootstrap-adm/assets/fast-check-example` run `npm ci --ignore-scripts` and `npm test`. Keep local links/frontmatter/lockfile consistent and preserve source provenance.
-
-## Preparing an app
-
-Preserve the target's stack/instructions; prefer SvelteKit for a fresh app. Keep private config/services server-only. Add actual session/ownership/data foundations and providers only from the brief, with isolated test resources and observable failure behavior.
-
-Run fast-check against real app rules alongside regressions; reset state per generated run and record faults/replay/mutation accounting. Test built server/browser paths and actual provider sandboxes separately.
-
-Track verified/pending/not-applicable evidence. Health cannot prove a job ran; mocks cannot prove provider delivery/payment; CI cannot prove restore. Marketing analytics defaults off and excludes private/auth/billing/provider routes.
-
-Follow target branch/release policy and existing user authorization for pushes, merges, deployment and production access. Use Site-Bootstrap-ADM for standard content websites.
+For Docker or serving changes, also build the image and verify the app, client assets, 404, health, build marker and browser interaction. Keep credentials out of template defaults and client bundles. Follow existing user authorization for pushes, merges and server changes.
