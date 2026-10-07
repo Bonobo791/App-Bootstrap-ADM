@@ -18,6 +18,7 @@
 </script>
 
 <svelte:head>
+  <title>App template</title>
   <meta name="description" content="A starting point for your application." />
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
