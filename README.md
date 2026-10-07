@@ -16,7 +16,9 @@ test ! -e ~/.agents/skills/app-bootstrap-adm && \
 
 Use the host's corresponding skill directory when it differs. If the skill already exists, review and merge changes deliberately.
 
-Then ask your agent to prepare the actual app project. For example:
+For a new product, follow [Plan a new site or app](#plan-a-new-site-or-app) to install `$plan-sites-and-apps-adm`, complete the interview, and publish the agreed plan before bootstrap work.
+
+For a project with an agreed plan, ask your agent to prepare the actual app project. For example:
 
 > Use $app-bootstrap-adm to prepare [project path or repository] as an app for [purpose and users]. Preserve the existing stack; for a new app, prefer SvelteKit. Keep undecided authentication, storage, billing, and hosting choices visible for me. Create the bootstrap and setup-task records, verify the app's real build and tests, and document the selected host's launch steps.
 
@@ -53,9 +55,7 @@ Before release, the target project should:
 1. Select its actual deployment profile, such as a server app or a client app with an external API. Record the artifact, selected runtime or adapter, configuration, and destination.
 2. Adapt `skills/app-bootstrap-adm/assets/release-runbook.template.md` into `docs/release-runbook.md`. Document the host's exact build and start or publish commands, required environment settings, smoke checks, and rollback path.
 3. Run the target's clean install, code generation, type, lint, format, test, and production build checks. Test the built server or client in a browser and verify real failure paths. If a database and migrations are selected, exercise them against disposable databases. Test selected providers in their sandbox separately from mocks and verify the selected adapter or host.
-4. Configure production secrets through the host's secret mechanism, not in source or client bundles. Verify the intended revision, readiness, public and private routes, one minimal operation, and selected integrations. Keep backup, restore, job, and alert checks pending until there is real evidence.
-
-The checks below validate this toolkit and its bundled examples. They do not launch or deploy the application created from it.
+4. Configure production secrets through the host's secret mechanism, not in source or client bundles. Verify the intended revision, readiness, public and private routes, one minimal operation, and selected integrations. Keep checks for selected capabilities pending until there is real evidence; mark checks for unselected capabilities not applicable and record the reason.
 
 ## Plan a new site or app
 
@@ -94,6 +94,8 @@ Properties run alongside regressions in the ordinary suite and CI. Specify indep
 The bundled synthetic analytics gate demonstrates the harness. It does not establish application auth, database isolation, billing, or provider safety. Add substantive properties against actual app modules.
 
 ## Validate this repository
+
+The commands below validate this toolkit and its bundled examples. They do not launch or deploy the application created from it.
 
 Run these commands from the repository root:
 
