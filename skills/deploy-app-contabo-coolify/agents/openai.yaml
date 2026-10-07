@@ -1,0 +1,4 @@
+interface:
+  display_name: "Contabo and Coolify app hosting"
+  short_description: "Host a SvelteKit/Node app on Contabo with Coolify."
+  default_prompt: "Use $deploy-app-contabo-coolify to deploy this application to the selected Contabo server with Coolify."
