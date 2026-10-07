@@ -1,0 +1,81 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+
+const base = process.argv[2];
+const commit = process.argv[3];
+assert.ok(base && commit, 'Usage: node scripts/test-browser.mjs <app-url> <source-commit>');
+const home = await fetch(base);
+assert.equal(home.status, 200);
+assert.match(home.headers.get('content-type'), /text\/html/);
+const html = await home.text();
+assert.match(html, /App template/);
+assert.equal([...html.matchAll(/<title>/g)].length, 1);
+const script = /"([^"\r\n]*_app\/immutable\/entry\/start[^"\r\n]+\.js)"/.exec(html)?.[1];
+assert.ok(script, 'Missing client hydration script');
+const asset = await fetch(new URL(script, base));
+assert.equal(asset.status, 200);
+assert.match(asset.headers.get('content-type'), /javascript/);
+const health = await fetch(`${base}/healthz`);
+assert.equal(health.status, 200);
+assert.match(health.headers.get('content-type'), /text\/plain/);
+assert.equal((await health.text()).trim(), 'ok');
+assert.equal(health.headers.get('cache-control'), 'no-store');
+const marker = await fetch(`${base}/build.json`);
+assert.equal(marker.status, 200);
+assert.match(marker.headers.get('content-type'), /application\/json/);
+assert.equal((await marker.json()).commit, commit);
+const robots = await fetch(`${base}/robots.txt`);
+assert.equal(robots.status, 200);
+assert.match(await robots.text(), /Disallow: \//);
+const missing = await fetch(`${base}/not-a-page`);
+assert.equal(missing.status, 404);
+assert.match(await missing.text(), /Page not found/);
+
+const browser = await chromium.launch({ executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH });
+try {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    const page = await browser.newPage({ viewport });
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    assert.equal((await page.goto(base, { waitUntil: 'networkidle' })).status(), 200);
+    assert.equal(await page.title(), 'App template');
+    assert.equal(await page.locator('title').count(), 1);
+    assert.equal(await page.locator('h1').textContent(), 'App template');
+    assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'), 'noindex, nofollow');
+    const button = page.getByRole('button', { name: 'Check server' });
+    await button.click();
+    await page.getByText('Server is ready.', { exact: true }).waitFor();
+    await page.route('**/healthz', route => route.abort('failed'));
+    await button.click();
+    await page.getByText('Server is unavailable. Try again.', { exact: true }).waitFor();
+    assert.ok(await button.isEnabled());
+    await page.unroute('**/healthz');
+    await page.route('**/healthz', route => route.fulfill({ status: 503, body: 'unavailable' }));
+    await button.click();
+    await page.getByText('Server is unavailable. Try again.', { exact: true }).waitFor();
+    assert.ok(await button.isEnabled());
+    await page.unroute('**/healthz');
+    await button.click();
+    await page.getByText('Server is ready.', { exact: true }).waitFor();
+    await page.route('**/healthz', () => {});
+    await button.click();
+    await page.getByText('Server is unavailable. Try again.', { exact: true }).waitFor({ timeout: 7000 });
+    assert.ok(await button.isEnabled());
+    await page.unroute('**/healthz');
+    await button.click();
+    await page.getByText('Server is ready.', { exact: true }).waitFor();
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+    assert.equal((await page.goto(`${base}/not-a-page`, { waitUntil: 'networkidle' })).status(), 404);
+    assert.equal(await page.locator('h1').textContent(), 'Page not found');
+    assert.equal(await page.locator('title').count(), 1);
+    assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'), 'noindex, nofollow');
+    await page.getByRole('link', { name: 'Return home' }).click();
+    await page.getByRole('heading', { name: 'App template', exact: true }).waitFor();
+    assert.equal(await page.locator('h1').textContent(), 'App template');
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+} finally {
+  await browser.close();
+}
+console.log('Production image: HTTP, client asset, marker, hydration, health success/failure/retry, 404/home and desktop/mobile checks passed.');

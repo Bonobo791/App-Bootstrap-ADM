@@ -6,7 +6,7 @@
     checking = true;
     status = '';
     try {
-      const response = await fetch('/healthz', { cache: 'no-store' });
+      const response = await fetch('/healthz', { cache: 'no-store', signal: AbortSignal.timeout(5000) });
       if (!response.ok || (await response.text()).trim() !== 'ok') throw new Error('Health check failed');
       status = 'Server is ready.';
     } catch {
@@ -18,7 +18,6 @@
 </script>
 
 <svelte:head>
-  <title>App template</title>
   <meta name="description" content="A starting point for your application." />
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +13,8 @@ const nodeDir = dirname(process.execPath);
 const npm = ['../lib/node_modules/npm/bin/npm-cli.js', 'node_modules/npm/bin/npm-cli.js', '../share/nodejs/npm/bin/npm-cli.js']
   .map(path => join(nodeDir, path)).find(existsSync);
 assert.ok(npm, 'Install npm alongside Node before running this check');
-const app = mkdtempSync(join(tmpdir(), 'app-toolkit-'));
+// Windows temp paths can use an 8.3 alias; Vite resolves source files to their full paths.
+const app = realpathSync.native(mkdtempSync(join(tmpdir(), 'app-toolkit-')));
 const env = { ...process.env, SOURCE_COMMIT: 'a'.repeat(40) };
 let server;
 let base;
@@ -51,6 +52,7 @@ try {
   assert.match(home.headers.get('content-type'), /text\/html/);
   const html = await home.text();
   assert.match(html, /App template/);
+  assert.equal([...html.matchAll(/<title>/g)].length, 1, 'Expected one document title');
   assert.match(html, /Fresh application content\./);
   assert.match(html, /noindex/);
   const script = /"([^"\r\n]*_app\/immutable\/entry\/start[^"\r\n]+\.js)"/.exec(html)?.[1];

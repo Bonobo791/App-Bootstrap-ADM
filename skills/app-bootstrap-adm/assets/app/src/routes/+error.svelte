@@ -3,7 +3,6 @@
 </script>
 
 <svelte:head>
-  <title>{page.status === 404 ? 'Page not found' : 'Something went wrong'}</title>
   <meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
