@@ -13,11 +13,17 @@ For a new VPS, use Ubuntu 24.04 LTS and SSH key access. Coolify needs at least 2
 
 Use the Contabo firewall to allow public TCP 80 and 443. Restrict SSH to the operators and Coolify, keeping the current session open while checking access. Restrict direct dashboard ports 8000, 6001 and 6002 to operators during setup. Docker-published ports can bypass ordinary UFW rules.
 
-On a fresh server without Coolify, connect with root or sudo access and run:
+On a fresh server without Coolify, connect with root or sudo access and use this pinned installer. Update the commit and checksum together when refreshing this recipe:
 
 ```sh
-curl -fsSL https://cdn.coollabs.io/coolify/install.sh -o /tmp/coolify-install.sh
-sudo bash /tmp/coolify-install.sh
+(
+  set -eu
+  coolify_installer=$(mktemp)
+  trap 'rm -f "$coolify_installer"' EXIT
+  curl -fsSL https://raw.githubusercontent.com/coollabsio/coolify/65262e639edd4fba4250074a6e7f59b21d964e2a/scripts/install.sh -o "$coolify_installer"
+  printf '%s  %s\n' add4e64e82b5fcb751415a681c26db2bff939d4f034d024c632ba0b7dc03c090 "$coolify_installer" | sha256sum --check -
+  sudo bash "$coolify_installer"
+)
 ```
 
 Create the first administrator immediately. Configure and verify an HTTPS dashboard domain, then close public access to direct dashboard ports. Back up `/data/coolify/source/.env` privately and validate the server in Coolify.
